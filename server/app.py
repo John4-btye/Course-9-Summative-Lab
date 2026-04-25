@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_migrate import Migrate
 from server.models import db, Workout, Exercise, WorkoutExercise
 from server.schemas import WorkoutExerciseSchema, WorkoutSchema, ExerciseSchema
@@ -26,14 +26,16 @@ def get_workouts():
     workouts = Workout.query.all()
     return workouts_schema.dump(workouts), 200
 
+
 @app.route('/workouts/<int:id>', methods=['GET'])
 def get_workout(id):
-    workout = Workout.query.get(id)
+    workout = db.session.get(Workout, id)
 
     if not workout:
         return {"error": "Workout not found"}, 404
 
     return workout_schema.dump(workout), 200
+
 
 @app.route('/workouts', methods=['POST'])
 def create_workout():
@@ -53,13 +55,14 @@ def create_workout():
     except Exception:
         return {"error": "Server error"}, 500
 
+
 @app.route('/workouts/<int:id>', methods=['DELETE'])
 def delete_workout(id):
-    workout = Workout.query.get(id)
+    workout = db.session.get(Workout, id)
 
     if not workout:
         return {"error": "Workout not found"}, 404
-    
+
     db.session.delete(workout)
     db.session.commit()
 
@@ -72,14 +75,16 @@ def get_exercises():
     exercises = Exercise.query.all()
     return exercises_schema.dump(exercises), 200
 
+
 @app.route('/exercises/<int:id>', methods=['GET'])
 def get_exercise(id):
-    exercise = Exercise.query.get(id)
+    exercise = db.session.get(Exercise, id)
 
     if not exercise:
         return {"error": "Exercise not found"}, 404
 
     return exercise_schema.dump(exercise), 200
+
 
 @app.route('/exercises', methods=['POST'])
 def create_exercise():
@@ -99,9 +104,10 @@ def create_exercise():
     except Exception:
         return {"error": "Server error"}, 500
 
+
 @app.route('/exercises/<int:id>', methods=['DELETE'])
 def delete_exercise(id):
-    exercise = Exercise.query.get(id)
+    exercise = db.session.get(Exercise, id)
 
     if not exercise:
         return {"error": "Exercise not found"}, 404
@@ -117,8 +123,8 @@ def delete_exercise(id):
 def add_exercise_to_workout(workout_id, exercise_id):
     data = request.get_json() or {}
 
-    workout = Workout.query.get(workout_id)
-    exercise = Exercise.query.get(exercise_id)
+    workout = db.session.get(Workout, workout_id)
+    exercise = db.session.get(Exercise, exercise_id)
 
     if not workout or not exercise:
         return {"error": "Workout or Exercise not found"}, 404

@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, fields, validates, ValidationError, validates_schema
 
 
 # WorkoutExercise Schema 
@@ -15,7 +15,7 @@ class WorkoutExerciseSchema(Schema):
 
     @validates_schema
     def validate_workout_exercise(self, data, **kwargs):
-        if not data.get("reps") and not data.get("duration_seconds"):
+        if data.get("reps") is None and data.get("duration_seconds") is None:
             raise ValidationError(
                 "Must include either reps/sets or duration_seconds"
             )
